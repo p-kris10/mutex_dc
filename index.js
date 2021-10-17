@@ -4,6 +4,8 @@ var socket = require('socket.io');
 const PORT = process.env.PORT_NUMBER;
 // App setup
 var app = express();
+const EventEmitter = require("events");
+const emitter = new EventEmitter();
 const vData  = require('./models/vaccine-data');
 const mongoose = require('mongoose');
 
@@ -16,42 +18,77 @@ mongoose.connect(dbURI,{useNewUrlParser : true, useUnifiedTopology: true})
 var server = app.listen(PORT, function(){
     console.log(`http://localhost:${PORT}`);
 });
-
-// const newData = new vData({
-//     "name":"RL Raheja Hospital",
-//     "location":"Bandra",
-//     "admin":"Dr.Gaurav Parulekar",
-//     "vaccine":{
-//       "covishield":250,
-//       "covaxin":100,
-//       "pfizer":30,
-//       "johnson and johnson":60
-//     }
-//   });
-
-// newData.save()
-//     .then((result)=>{
-//        console.log(result);
-//     })
-//     .catch((err)=>{
-//         console.log(err);
-//     })
-
+var data = null;
+var token = true;
+const fetchData=()=>{
+    
+}
+emitter.on("token",()=>{
+    console.log(token);
+    token = !token
+    console.log(token);
+})
 // Static files
 app.use(express.static('public'));
+function canEnter(id)
+{
+    if(token === true)
+    {
+        console.log("Token to given to process",id);
+        return true;
+    }
+    else
+    {
+       return false;
+
+    }
+}
 
 // Socket setup & pass server
 var io = socket(server);
 io.on('connection', (socket) => {
 
     console.log('made socket connection', socket.id);
+    //fetch initial data
+    vData.find()
+        .then((result)=>
+        {
+            data = result;
+            console.log("got data");
+            socket.emit("data",data);
+        })
+        .catch((err)=>
+        {
+            console.log("err");
+            console.log(err);
+            return err;
+        })
+        
 
-    socket.on("add",function(data){
-        var a = parseInt(data.n1,10);
-        var b = parseInt(data.n2,10);
-        var c = a+b;
-        console.log(a+b);
-        io.to(socket.id).emit("result",{ result:c});
+    socket.on("book",function(data){
+        while(!canEnter(socket.id));
+        if(canEnter(socket.id) === true)
+        {
+            console.log("giving token");
+            emitter.emit("token");
+            socket.emit("TOKEN");
+        }
+    });
+    socket.on("EXECUTE_CS",function(data){
+        var vacci = data.vacci;
+        var q = parseInt(data.quantity,10);
+        console.log("Executing CS");
+        setTimeout(()=>{console.log("Done")},5000);
+        io.to(socket.id).emit("done");
+    });
+    socket.on("return_token",function(data){
+       emitter.emit("token");
+       io.to(socket.id).emit("result",{ result:"booked"});
+    });
+    
+
+    socket.on("updated",function(data){
+        socket.emit("data",{data : data});
     });
 
 });

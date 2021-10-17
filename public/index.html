@@ -7,15 +7,24 @@
         <link href="/styles.css" rel="stylesheet" />
     </head>
     <body>
-        <h1>Socket Programming</h1>
+        
         <div id ="num_in">
-            <div id="window">
-                <h2>Enter two numbers to add</h2>
-                <input id="num1" type="text" placeholder="number 1">
-                <input id="num2" type="text" placeholder="number 2">
-                <button id="add">ADD</button>
+            
+                <h2 id="name">Enter two numbers to add</h2>
+                <h2 id="location"></h2>
+                <h2 id="Covishield"></h2>
+                <h2 id="Covaxin"></h2>
+                <h2 id="john"></h2>
+                <h2 id="pfizer"></h2>
+                <select name="vacc" id="vaccine">
+                    <option value="p">Pfizer</option>
+                    <option value="j">Johnson</option>
+                    <option value="covi">Covishield</option>
+                    <option value="covax">Covaxin</option>
+                </select>
+                <button id="add">Book</button>
                 <div id="out"></div>
-            </div>
+          
         </div>
 
         <script src="/add.js"></script>
