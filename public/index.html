@@ -1,11 +1,24 @@
+
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
         <title>WebScockets 101</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.min.js"></script>
         <link href="/styles.css" rel="stylesheet" />
     </head>
     <body>
-        <h1>Woo, you see me!</h1>
+        <h1>Socket Programming</h1>
+        <div id ="num_in">
+            <div id="window">
+                <h2>Enter two numbers to add</h2>
+                <input id="num1" type="text" placeholder="number 1">
+                <input id="num2" type="text" placeholder="number 2">
+                <button id="add">ADD</button>
+                <div id="out"></div>
+            </div>
+        </div>
+
+        <script src="/add.js"></script>
     </body>
 </html>
