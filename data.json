@@ -1,0 +1,11 @@
+{
+  "name":"RL Raheja Hospital",
+  "location":"Bandra",
+  "admin":"Dr.Gaurav Parulekar",
+  "vaccine":{
+    "covishield":250,
+    "covaxin":100,
+    "pfizer":30,
+    "johnson and johnson":60
+  }
+}
