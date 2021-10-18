@@ -18,15 +18,16 @@ btn.addEventListener('click',function(){
     var select = document.getElementById('vaccine');
     vacci = select.options[select.selectedIndex].value; 
     console.log(vacci);
-    socket.emit("book");
+    socket.emit("Book(TOKEN_REQUEST)");
 });
 
 //Listening for event
 socket.on("result",function(data){
-    out.innerHTML += '<p><strong>Sum = '+ data.result+'</strong></p>';
+    out.innerHTML += '<p><strong>Vaccine '+ data.result+'</strong></p>';
+    socket.emit("update");
 
 })
-socket.on("TOKEN",()=>{
+socket.on("GIVE_TOKEN",()=>{
     console.log("token recieved");
     socket.emit("EXECUTE_CS",{
         vacc: vacci,
@@ -34,7 +35,7 @@ socket.on("TOKEN",()=>{
     });
 })
 socket.on("done",()=>{
-    socket.emit("return_token");
+    socket.emit("RETURN_TOKEN");
 })
 socket.on("wait",function(data){
     console.log("waiting");
@@ -45,7 +46,7 @@ socket.on("data",(data)=>{
     hosp_name.innerHTML = data[0].name;
     loc.innerHTML = "Location :"+ data[0].location;
     cov.innerHTML = "Covaxin : " + data[0]["vaccine"]["covaxin"];
-    covi.innerHTML = "Covaxin : " + data[0]["vaccine"]["covishield"];
-    john.innerHTML = "Covaxin : " + data[0]["vaccine"]["johnson and johnson"];
+    covi.innerHTML = "Covishield : " + data[0]["vaccine"]["covishield"];
+    john.innerHTML = "Johnson and Johnson : " + data[0]["vaccine"]["johnson and johnson"];
     pfizer.innerHTML = "Pfizer :" + data[0]["vaccine"]["pfizer"];
 })

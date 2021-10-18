@@ -15,7 +15,7 @@ mongoose.connect(dbURI,{useNewUrlParser : true, useUnifiedTopology: true})
     .then((result)=> console.log('connected to db'))
     .catch((err)=>{console.log(err)});
 
-
+const map = new Map(); 
 var server = app.listen(PORT, function(){
     console.log(`http://localhost:${PORT}`);
 });
@@ -27,20 +27,16 @@ emitter.on("give token",()=>{
     
     fs.writeFileSync("token.txt", "0");
     token = fs.readFileSync("token.txt", "utf-8");
-    console.log("Token given ");
-    console.log("value changed to", token);
+    // console.log("value changed to", token);
 })
 
 emitter.on("token recieved",()=>{
     fs.writeFileSync("token.txt", "1");
     token = fs.readFileSync("token.txt", "utf-8");
-    console.log("Token returned ");
-    console.log("value changed to", token);
+    // console.log("value changed to", token);
 
 })
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+
 const getToken =()=>{
     return parseInt(fs.readFileSync("token.txt", "utf-8"));
 }
@@ -49,15 +45,20 @@ app.use(express.static('public'));
 
 // Socket setup & pass server
 var io = socket(server);
-io.on('connection', (socket) => {
 
-    console.log('made socket connection', socket.id);
+io.on('connection', (socket) => {
+    //console.log('made socket connection', socket.id);
+    const count = io.engine.clientsCount;
+    map.set(socket.id,count);
+    console.log("Connected with Process ",count);
+    
+    
     //fetch initial data
     vData.find()
         .then((result)=>
         {
             data = result;
-            console.log("got data");
+            console.log("Fetched data");
             socket.emit("data",data);
         })
         .catch((err)=>
@@ -68,49 +69,128 @@ io.on('connection', (socket) => {
         })
         
 
-    socket.on("book",function(data){
-        // console.log("Token == ",token);
+    socket.on("Book(TOKEN_REQUEST)",function(data){
         var x = getToken();
-        console.log("x = ",x);
-        if( x !== 1)
+        // console.log("x = ",x);
+        if(x !== 1)
         {
-            console.log("pushed to queue");
+            console.log("Token not available");
+            console.log("Process "+ map.get(socket.id) + " Pushed to queue");
             queue.push(socket.id);
             io.to(socket.id).emit("wait");
         }
         else
         {
             emitter.emit("give token");
-            io.to(socket.id).emit("TOKEN");
+            console.log("Token given to Process",map.get(socket.id));
+            io.to(socket.id).emit("GIVE_TOKEN");
             // console.log("Token=",token);
         }
     });
     socket.on("EXECUTE_CS",function(data){
-        var vacci = data.vacci;
+        var vacci = data.vacc;
         var q = parseInt(data.quantity,10);
-        console.log("Executing CS",socket.id);
+        console.log("Process "+map.get(socket.id)+" Executing in CS");
+        //CS
+        console.log(typeof vacci);
+        if(vacci === "p")
+        {
+            
+            console.log("Entered here")
+            vData.findOneAndUpdate({_id : "616bf50df53a9a9651d49fe1"},
+                {$inc:{
+                    "vaccine.pfizer" : -1
+                }},{new:true})
+                .exec()
+                .then((result)=>{
+                    console.log(result);
+                    console.log("Booked Pfizer")})
+                .catch((err)=>
+                {
+                    console.log(err);
+                })
+        }
+        if(vacci === "j")
+        {
+            vData.findOneAndUpdate({_id : "616bf50df53a9a9651d49fe1"},
+                {$inc:{
+                    "vaccine.johnson and johnson" : -1
+                }},{new:true})
+                .exec()
+                .then((result)=>{
+                    console.log(result);
+                    console.log("Booked Johnson and Johnson")})
+                .catch((err)=>
+                {
+                    console.log(err);
+                })
+
+        }
+        if(vacci === "covi")
+        {
+            vData.findOneAndUpdate({_id : "616bf50df53a9a9651d49fe1"},
+                {$inc:{
+                    "vaccine.covishield" : -1
+                }},{new:true})
+                .exec()
+                .then((result)=>{
+                    console.log(result);
+                    console.log("Booked Covishield")})
+                .catch((err)=>
+                {
+                    console.log(err);
+                })
+
+        }
+        if(vacci === "covax")
+        {
+            vData.findOneAndUpdate({_id : "616bf50df53a9a9651d49fe1"},
+                {$inc:{
+                    "vaccine.covaxin" : -1
+                }},{new:true})
+                .exec()
+                .then((result)=>{
+                    // console.log(result);
+                    console.log("Booked Covaxin")})
+                .catch((err)=>
+                {
+                    console.log(err);
+                })
+
+        }
+        
         setTimeout(()=>{
-        console.log("Done")
+        console.log("Exiting CS")
         io.to(socket.id).emit("done");
     },10000);
         
         
     });
-    socket.on("return_token",function(data){
+    socket.on("RETURN_TOKEN",function(data){
        emitter.emit("token recieved");
+       console.log("Token returned by Process",map.get(socket.id));
        io.to(socket.id).emit("result",{ result:"booked"});
        if(queue.length != 0)
        {
-           console.log("This happened");
            const s = queue.shift();
-           token = 0;
-           io.to(s).emit("TOKEN");
+           io.to(s).emit("GIVE_TOKEN");
        }
     });
     
 
-    socket.on("updated",function(data){
-        socket.emit("data",{data : data});
+    socket.on("update",function(){
+        vData.find()
+        .then((result)=>
+        {
+            data = result;
+            io.sockets.emit('data', data);
+        })
+        .catch((err)=>
+        {
+            console.log("err");
+            console.log(err);
+            return err;
+        })
     });
 
 });
