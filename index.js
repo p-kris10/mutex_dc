@@ -162,7 +162,7 @@ io.on('connection', (socket) => {
         setTimeout(()=>{
         console.log("Exiting CS")
         io.to(socket.id).emit("done");
-    },10000);
+    },5000);
         
         
     });
