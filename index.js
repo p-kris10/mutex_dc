@@ -92,18 +92,18 @@ io.on('connection', (socket) => {
         var q = parseInt(data.quantity,10);
         console.log("Process "+map.get(socket.id)+" Executing in CS");
         //CS
-        console.log(typeof vacci);
+        // console.log(typeof vacci);
         if(vacci === "p")
         {
             
-            console.log("Entered here")
+            // console.log("Entered here")
             vData.findOneAndUpdate({_id : "616bf50df53a9a9651d49fe1"},
                 {$inc:{
                     "vaccine.pfizer" : -1
                 }},{new:true})
                 .exec()
                 .then((result)=>{
-                    console.log(result);
+                    // console.log(result);
                     console.log("Booked Pfizer")})
                 .catch((err)=>
                 {
@@ -118,7 +118,7 @@ io.on('connection', (socket) => {
                 }},{new:true})
                 .exec()
                 .then((result)=>{
-                    console.log(result);
+                    // console.log(result);
                     console.log("Booked Johnson and Johnson")})
                 .catch((err)=>
                 {
@@ -134,7 +134,7 @@ io.on('connection', (socket) => {
                 }},{new:true})
                 .exec()
                 .then((result)=>{
-                    console.log(result);
+                    // console.log(result);
                     console.log("Booked Covishield")})
                 .catch((err)=>
                 {
