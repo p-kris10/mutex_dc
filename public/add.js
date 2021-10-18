@@ -33,8 +33,12 @@ socket.on("TOKEN",()=>{
         quantity: 1
     });
 })
-socket.on("Done",()=>{
+socket.on("done",()=>{
     socket.emit("return_token");
+})
+socket.on("wait",function(data){
+    console.log("waiting");
+
 })
 socket.on("data",(data)=>{
     console.log(data);
